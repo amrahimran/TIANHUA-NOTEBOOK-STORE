@@ -1,4 +1,4 @@
-@section('title', 'Products | Tian Hua')
+@section('title', 'My Orders | Tian Hua')
 
 <x-app-layout>
     <div class="py-12">

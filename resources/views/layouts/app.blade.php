@@ -6,7 +6,14 @@
     <meta name="description" content="Explore the elegance of Tian Hua. Purchase premium notebooks online and enjoy same-day delivery. Discover the beauty of exquisite journals that have been meticulously designed with excellence.">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $pageTitle ?? 'Tian Hua | Notebook Store' }}</title>
+    <title>@yield('title', 'Tian Hua | Notebook Store')</title>
+
+
+    {{-- <title>{{ $pageTitle ?? 'Tian Hua | Notebook Store' }}</title> --}}
+
+    {{-- @php
+        $pageTitle = "Home | About Us";
+    @endphp --}}
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -18,7 +25,7 @@
     @livewireStyles
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-white">
     <x-banner />
 
     <!-- Navigation -->
