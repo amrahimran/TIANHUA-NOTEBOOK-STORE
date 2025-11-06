@@ -12,7 +12,7 @@
     }
   
     .navitems {
-      @apply text-[#49608a] hover:text-[#ffffff]  text-xl font-semibold;
+      @apply  text-[#49608a] hover:text-[#752c37] font-semibold;
     }
 
     .navicons{
