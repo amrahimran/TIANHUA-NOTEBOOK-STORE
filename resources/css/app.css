@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none;
+}
+
+@layer components {
+    .navbar {
+      @apply bg-[#7dadc4] h-[80px] max-w-[1500px] mx-auto flex items-center justify-between px-4;
+    }
+  
+    .navitems {
+      @apply text-[#49608a] hover:text-[#ffffff]  text-xl font-semibold;
+    }
+
+    .navicons{
+      @apply text-[#49608a] hover:text-[#ffffff] text-2xl hidden md:inline-block;
+    }
+
+    .button{
+        @apply bg-[#49608a] text-white text-lg py-3 px-8 rounded-lg hover:bg-[#752c37] ;
+    }
+
+    .subheading{
+        @apply text-left text-3xl font-mono font-semibold tracking-wide text-[#49608a] mb-6;
+    }
+
+    .footer{
+      @apply max-w-[1500px] mx-auto mt-10 bg-[#7dadc4] text-white py-8;
+    }
+  }
+
+  @layer utilities {
+    .bg-login {
+        background-image: url('/images/login-img.jpg');
+        @apply bg-cover bg-center;
+    }
+}
+
+     /* extend: {
+      colors: {
+        'blue-theme': '[#7dadc4]',
+        'accent-color':'[#49608a]',
+      },
+      fontFamily: {
+        roboto: ['Roboto', 'Arial', 'sans-serif'],
+      },
+    },
+  }, */
+  /* code to rebuuld changes- 
+npx tailwindcss -i ./src/styles.css -o ./dist/output.css --watch */
