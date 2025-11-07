@@ -59,7 +59,7 @@
     <!-- Overlay content -->
     <div class="overlay">
         <img src="{{ asset('images/transparentlogo.png') }}" alt="Tian Hua Logo">
-        <h1 class="text-5xl lg:text-6xl font-bold mb-6">Welcome to <br> <b class="text-[#49608a]">Tian Hua</b></h1>
+        <h1 class=" text-5xl lg:text-6xl font-semibold mb-6">Welcome to <br> <b class="text-[#49608a] font-semibold">Tian Hua</b></h1>
         <p class="text-lg lg:text-xl mb-8">Discover cute journals, notebooks, and stationery.</p>
         <div class="flex gap-4">
             <a href="{{ route('login') }}" class="button">Login</a>

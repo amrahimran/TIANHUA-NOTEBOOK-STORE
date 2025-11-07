@@ -7,13 +7,6 @@
 }
 
 @layer components {
-    .navbar {
-      @apply bg-[#7dadc4] h-[80px] max-w-[1500px] mx-auto flex items-center justify-between px-4;
-    }
-  
-    .navitems {
-      @apply  text-[#49608a] hover:text-[#752c37] font-semibold;
-    }
 
     .navicons{
       @apply text-[#49608a] hover:text-[#ffffff] text-2xl hidden md:inline-block;
@@ -32,12 +25,20 @@
     }
   }
 
-  @layer utilities {
+    @layer utilities {
+      .bg-login {
+        background-image: url("/images/login-img.jpg");
+        @apply bg-cover bg-center bg-no-repeat;
+      }
+    }
+
+
+  /* @layer utilities {
     .bg-login {
         background-image: url('/images/login-img.jpg');
         @apply bg-cover bg-center;
     }
-}
+} */
 
      /* extend: {
       colors: {

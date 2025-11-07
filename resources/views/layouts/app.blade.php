@@ -51,9 +51,9 @@
                     <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
                     <ul class="space-y-2 flex flex-col">
                         <li><a href="{{ route('dashboard') }}" class="hover:text-[#49608a]">Home</a></li>
-                        <li><a href="{{ url('/aboutus') }}" class="hover:text-[#49608a]">About Us</a></li>
-                        <li><a href="{{ url('/allproducts') }}" class="hover:text-[#49608a]">Products</a></li>
-                        <li><a href="{{ url('/contactus') }}" class="hover:text-[#49608a]">Contact</a></li>
+                        <li><a href="{{ url('profile/about') }}" class="hover:text-[#49608a]">About Us</a></li>
+                        <li><a href="{{ url('profile/products') }}" class="hover:text-[#49608a]">Products</a></li>
+                        <li><a href="{{ url('profile/contact') }}" class="hover:text-[#49608a]">Contact</a></li>
                     </ul>
                 </div>
 
