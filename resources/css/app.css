@@ -13,7 +13,7 @@
     }
 
     .button{
-        @apply bg-[#49608a] text-white text-lg py-3 px-8 rounded-lg hover:bg-[#752c37] ;
+        @apply bg-[#49608a] text-white text-lg py-3 px-8 rounded-lg hover:bg-[#7dadc4] ;
     }
 
     .subheading{

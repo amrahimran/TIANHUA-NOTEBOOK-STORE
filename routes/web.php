@@ -1,13 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
-use App\Http\Controllers\ProductController;
-
 
 Route::middleware([
     'auth:sanctum',
@@ -19,48 +24,69 @@ Route::middleware([
 
 Route::get('product/details/{id}', [ProductController::class, 'product.details'])->name('details');
 
+Route::get('/profile/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
 
-// Route::middleware([
-//     'auth:sanctum',
-//     config('jetstream.auth_session'),
-//     'verified',
-// ])->group(function () {
-//     Route::get('/dashboard', function () {
-//         return view('dashboard');
-//     })->name('dashboard');
-// });
-
-
-// Route::get('/profile/dashboard', function () {
-//     return view('dashboard');
-// })->name('home');
-
-Route::get('/profile/products', function () {
-    return view('products');
-})->name('products');
 
 Route::get('/profile/myorders', function () {
-    return view('myorders');
-})->name('myorders');
+    $orders = Order::where('user_id', Auth::id())->get(); // fetch orders for logged-in user
+    return view('myorders', compact('orders'));
+})->name('myorders')->middleware('auth');
 
 Route::get('/profile/about', function () {
     return view('profile.about');
 })->name('about');
 
 Route::get('/profile/contact', function () {
-    return view('contact');
+    return view('profile.contact');
 })->name('contact');
 
-// Wishlist Page
-Route::get('/profile/products/wishlist', function () {
-    return view('profile.products.wishlist');
-})->name('wishlist');
+// Handle contact form submission
+Route::post('/profile/contact', [ContactController::class, 'submit'])->name('contact.submit');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/wishlist/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+});
 
 // Cart Page
-Route::get('/profile/products/cart', function () {
-    return view('profile.products.cart');
-})->name('cart');
 
+Route::get('/profile/products/cart', [CartController::class, 'index'])->name('cart');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+});
+
+//Orders/checkout routes
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+
+Route::get('/myorders', [OrderController::class, 'index'])->name('myorders');
+
+//admin routes with middleware.
+
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Middleware\AdminMiddleware;
+
+
+Route::middleware(['auth', AdminMiddleware::class])->group(function () {
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // CRUD for products
+    Route::resource('admin/products', AdminProductController::class, ['as' => 'admin']);
+
+    // CRUD for orders
+    Route::resource('admin/orders', AdminOrderController::class, ['as' => 'admin']);
+});
 
 

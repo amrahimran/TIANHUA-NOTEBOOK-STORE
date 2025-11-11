@@ -18,7 +18,7 @@
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('products') }}" :active="request()->routeIs('products')">
+                    <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.index')">
                         {{ __('Products') }}
                     </x-nav-link>
                 </div>
@@ -46,7 +46,7 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
 
                 <!-- Wishlist Icon -->
-                <a href="{{ route('wishlist') }}" class="text-[#49608a] hover:text-[#7dadc4] transition-colors duration-200">
+                <a href="{{ route('wishlist.index') }}" class="text-[#49608a] hover:text-[#7dadc4] transition-colors duration-200">
                     <i class="fas fa-heart text-xl"></i>
                 </a>
 
@@ -141,7 +141,7 @@
             <x-responsive-nav-link href="{{ route('dashboard') }}">
                 {{ __('Home') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('products') }}">
+            <x-responsive-nav-link href="{{ route('products.index') }}">
                 {{ __('Products') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('myorders') }}">
@@ -154,9 +154,9 @@
                 {{ __('Contact') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="{{ route('wishlist') }}" class="text-[#49608a] hover:text-[#7dadc4] transition-colors duration-200">
+            {{-- <x-responsive-nav-link href="{{ route('wishlist.add', $product) }}" class="text-[#49608a] hover:text-[#7dadc4] transition-colors duration-200">
                 <i class="fas fa-heart text-xl"></i> {{ __('Wishlist') }}
-            </x-responsive-nav-link>
+            </x-responsive-nav-link> --}}
             <x-responsive-nav-link href="{{ route('cart') }}" class="text-[#49608a] hover:text-[#7dadc4] transition-colors duration-200">
                 <i class="fas fa-shopping-cart text-xl"></i>++ {{ __('Cart') }}
             </x-responsive-nav-link>

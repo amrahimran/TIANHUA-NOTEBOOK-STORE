@@ -8,13 +8,6 @@
 
     <title>@yield('title', 'Tian Hua | Notebook Store')</title>
 
-
-    {{-- <title>{{ $pageTitle ?? 'Tian Hua | Notebook Store' }}</title> --}}
-
-    {{-- @php
-        $pageTitle = "Home | About Us";
-    @endphp --}}
-
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
