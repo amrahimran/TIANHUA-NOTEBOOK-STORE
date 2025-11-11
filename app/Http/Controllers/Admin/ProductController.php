@@ -23,16 +23,22 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'color' => 'nullable|string|max:100',
             'price' => 'required|numeric',
             'quantity' => 'required|integer',
-            'image' => 'nullable|image',
+            'isBestSeller' => 'required|boolean',
             'description' => 'nullable|string',
+            'image' => 'nullable|image',
         ]);
 
         $product = new Products();
         $product->name = $request->name;
+        $product->category = $request->category;
+        $product->color = $request->color;
         $product->price = $request->price;
         $product->quantity = $request->quantity;
+        $product->isBestSeller = $request->isBestSeller;
         $product->description = $request->description;
 
         if ($request->hasFile('image')) {
@@ -57,15 +63,21 @@ class ProductController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'color' => 'nullable|string|max:100',
             'price' => 'required|numeric',
             'quantity' => 'required|integer',
-            'image' => 'nullable|image',
+            'isBestSeller' => 'required|boolean',
             'description' => 'nullable|string',
+            'image' => 'nullable|image',
         ]);
 
         $product->name = $request->name;
+        $product->category = $request->category;
+        $product->color = $request->color;
         $product->price = $request->price;
         $product->quantity = $request->quantity;
+        $product->isBestSeller = $request->isBestSeller;
         $product->description = $request->description;
 
         if ($request->hasFile('image')) {

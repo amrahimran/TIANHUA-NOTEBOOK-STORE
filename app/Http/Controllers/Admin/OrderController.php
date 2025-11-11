@@ -11,28 +11,8 @@ class OrderController extends Controller
     // Show all orders
     public function index()
     {
-        $orders = Order::all(); // Or paginate: Order::paginate(10)
+        $orders = Order::orderBy('id', 'desc')->get();
         return view('admin.orders.index', compact('orders'));
-    }
-
-    // Show form to create an order (optional)
-    public function create()
-    {
-        return view('admin.orders.create');
-    }
-
-    // Store a new order (optional)
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'total' => 'required|numeric',
-            'status' => 'required|string',
-        ]);
-
-        Order::create($request->all());
-
-        return redirect()->route('admin.orders.index')->with('success', 'Order added successfully!');
     }
 
     // Show form to edit an order
@@ -44,23 +24,30 @@ class OrderController extends Controller
     // Update an order
     public function update(Request $request, Order $order)
     {
-        // Validate input
         $request->validate([
-            'customer_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string',
+            'city' => 'required|string|max:100',
+            'payment_method' => 'required|string|max:50',
             'total' => 'required|numeric',
-            'status' => 'required|in:Pending,Completed', // only allow these two
+            'status' => 'required|in:Pending,Completed',
         ]);
 
-        // Update the order
         $order->update([
-            'name' => $request->customer_name,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'city' => $request->city,
+            'payment_method' => $request->payment_method,
             'total' => $request->total,
             'status' => $request->status,
         ]);
 
         return redirect()->route('admin.orders.index')->with('success', 'Order updated successfully!');
     }
-
 
     // Delete an order
     public function destroy(Order $order)
@@ -69,4 +56,3 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.index')->with('success', 'Order deleted successfully!');
     }
 }
-
