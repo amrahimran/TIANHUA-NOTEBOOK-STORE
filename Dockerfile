@@ -11,7 +11,7 @@ COPY package*.json ./
 # Install Node dependencies
 RUN npm install
 
-# Copy the ENTIRE project for Vite (so vite.config.js and resources exist)
+# Copy the entire Laravel project for Vite
 COPY . .
 
 # Build Vite assets for Laravel
@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy Laravel app
+# Copy Laravel project
 COPY . .
 
 # Copy built Vite assets from Node stage
@@ -41,14 +41,14 @@ COPY --from=node-builder /app/public/build ./public/build
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Set permissions for storage and cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Set permissions for storage, cache, and built assets
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/public/build
 
 # Clear and cache Laravel configs
 RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && php artisan config:cache
 
-# Expose port (Railway will map $PORT)
+# Expose port (Railway will route automatically)
 EXPOSE 9000
 
-# Start PHP-FPM (production-ready)
+# Start PHP-FPM
 CMD ["php-fpm"]
