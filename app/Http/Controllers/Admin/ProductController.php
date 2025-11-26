@@ -22,6 +22,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'id' => 'required|string|max:255|unique:products',
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'color' => 'nullable|string|max:100',
@@ -33,6 +34,7 @@ class ProductController extends Controller
         ]);
 
         $product = new Products();
+        $product->id = $request->id;
         $product->name = $request->name;
         $product->category = $request->category;
         $product->color = $request->color;
@@ -44,6 +46,8 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
             $product->image = $imagePath;
+        } elseif ($request->image_url) {
+            $product->image = $request->image_url;
         }
 
         $product->save();
@@ -62,6 +66,7 @@ class ProductController extends Controller
         $product = Products::findOrFail($id);
 
         $request->validate([
+            'id' => 'required|string|max:255|unique:products,id,' . $product->id . ',id',
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'color' => 'nullable|string|max:100',
@@ -72,6 +77,7 @@ class ProductController extends Controller
             'image' => 'nullable|image',
         ]);
 
+        $product->id = $request->id;
         $product->name = $request->name;
         $product->category = $request->category;
         $product->color = $request->color;

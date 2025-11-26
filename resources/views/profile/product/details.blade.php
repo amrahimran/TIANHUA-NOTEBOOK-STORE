@@ -14,10 +14,6 @@
 
             <!-- Product Info -->
             <div class="w-full md:w-9/20">
-                {{-- <div class="flex justify-between items-center">
-                    <h3 class="text-3xl font-bold mt-4">{{ $product->name }}</h3>
-                    <i id="wishlist-icon" class="far fa-heart text-[#49608a] text-2xl cursor-pointer"></i>
-                </div> --}}
                 <div class="flex justify-between items-center">
                     <h3 class="text-3xl font-bold mt-4">{{ $product->name }}</h3>
                     <i id="wishlist-icon"
@@ -26,7 +22,7 @@
                     </i>
                 </div>
                 <p class="mt-2">{{ $product->description }}</p>
-                <p class="text-[#49608a]  font-bold text-2xl mt-4">Rs.{{ $product->price }}</p>
+                <p class="text-[#49608a] font-bold text-2xl mt-4">Rs.{{ $product->price }}</p>
 
                 <!-- Size Options -->
                 @if (strtolower($product->category) !== 'other')
@@ -48,46 +44,80 @@
                             id="color-options"
                             data-product-id="{{ $product->id }}" 
                             data-current-color="{{ strtolower($product->color) }}">
-                            <!-- Color buttons will be dynamically injected here -->
                         </div>
                     </div>
                 @endif
 
-                        <!-- Quantity -->
-                    <div class="mt-6 flex items-center">
-                        <h4 class="text-lg font-semibold text-gray-700 mr-4">Quantity</h4>
-                        <div class="flex items-center border rounded-lg shadow-sm overflow-hidden">
-                            <button id="decrement" 
-                                class="px-4 py-2 bg-[#49608a] text-white hover:bg-[#7dadc4] transition-colors duration-200 ease-in-out rounded-l-lg">
-                                -
-                            </button>
-
-                            <input 
-                                type="number" 
-                                id="quantity" 
-                                class="w-14 text-center px-1 py-1 bg-white border-none text-gray-600 font-semibold outline-none focus:outline-none" 
-                                value="1" 
-                                min="1" 
-                                readonly
-                            >
-
-                            <button id="increment" 
-                                class="px-4 py-2 bg-[#49608a] text-white hover:bg-[#7dadc4] transition-colors duration-200 ease-in-out rounded-r-lg">
-                                +
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Add to Cart -->
-                    <div class="mt-8">
-                        <button class="button" id="addToCart" data-id="{{ $product->id }}">Add to Cart</button>
+                <!-- Quantity -->
+                <div class="mt-6 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-700 mr-4">Quantity</h4>
+                    <div class="flex items-center border rounded-lg shadow-sm overflow-hidden">
+                        <button id="decrement" class="px-4 py-2 bg-[#49608a] text-white hover:bg-[#7dadc4] rounded-l-lg">-</button>
+                        <input type="number" id="quantity" class="w-14 text-center px-1 py-1 bg-white border-none text-gray-600 font-semibold outline-none" value="1" min="1" readonly>
+                        <button id="increment" class="px-4 py-2 bg-[#49608a] text-white hover:bg-[#7dadc4] rounded-r-lg">+</button>
                     </div>
                 </div>
+
+                <!-- Add to Cart -->
+                <div class="mt-8">
+                    <button class="button" id="addToCart" data-id="{{ $product->id }}" onclick="addToCart('{{ $product->id }}')">Add to Cart</button>
+                </div>
             </div>
+        </div>
+
+        <hr class="my-6">
+
+        <h3 class="text-xl font-semibold mb-4">Customer Reviews</h3>
+
+        <!-- Existing Reviews -->
+        @forelse($reviews as $review)
+            <div class="mb-4 border-b pb-2">
+                <div class="flex justify-between">
+                    <strong>{{ $review->user->name ?? 'Unknown User' }}</strong>
+                    <span class="text-yellow-500">⭐ {{ $review->rating }}/5</span>
+                </div>
+                <p>{{ $review->comment }}</p>
+
+                @if(Auth::check() && Auth::id() == $review->user_id)
+                    <form action="{{ route('reviews.destroy', $review->_id) }}" method="POST" class="mt-2">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-500 text-sm">Delete</button>
+                    </form>
+                @endif
+            </div>
+        @empty
+            <p class="text-gray-600">No reviews yet. Be the first to review this product!</p>
+        @endforelse
+
+        <!-- Add Review Form -->
+        @if(Auth::check())
+            <form action="{{ route('reviews.store', $product->id) }}" method="POST" class="mt-6">
+                @csrf
+                <div class="mb-3">
+                    <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
+                    <select name="rating" id="rating" class="w-24 mt-1 border-gray-300 rounded-md">
+                        @for($i=1; $i<=5; $i++)
+                            <option value="{{ $i }}">{{ str_repeat('⭐', $i) }} {{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="comment" class="block text-sm font-medium text-gray-700">Comment</label>
+                    <textarea name="comment" id="comment" rows="3" class="w-full border-gray-300 rounded-md" required></textarea>
+                </div>
+
+                <button type="submit" class="button">Submit Review</button>
+            </form>
         @else
-            <p class="text-center text-lg text-red-500">Product not found or not available.</p>
+            <p class="text-gray-600 mt-4">Please <a href="/login" class="text-blue-600 underline">log in</a> to write a review.</p>
         @endif
-    </main>
+
+    @else
+        <p class="text-center text-lg text-red-500">Product not found or not available.</p>
+    @endif
+</main>
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {

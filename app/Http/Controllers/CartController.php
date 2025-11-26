@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Products;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Cart;
 
 class CartController extends Controller
 {
-    // 🛒 Add item to cart
-    public function add($id)
+    
+    public function add(Request $request, $id)
     {
+        // Always use logged-in user ID
+        $user_id = Auth::id();
         $product = Products::where('id', $id)->first();
 
         if (!$product) {
@@ -18,21 +22,26 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
+        // Get quantity from request, default to 1
+        $quantity = intval($request->quantity ?? 1);
+
         if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+            // If already in cart, add the requested quantity
+            $cart[$id]['quantity'] += $quantity;
         } else {
             $cart[$id] = [
                 'name' => $product->name,
                 'price' => $product->price,
                 'image' => $product->image,
-                'quantity' => 1
+                'quantity' => $quantity
             ];
         }
 
         session()->put('cart', $cart);
 
-        return response()->json(['success' => true, 'message' => 'Added to cart']);
+        return response()->json(['success' => true, 'message' => 'Added to cart', 'cart' => $cart]);
     }
+
 
     // Show cart page
     public function index()
@@ -54,15 +63,50 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Item removed successfully!');
     }
 
-    // 🔄 Update quantity
+    // Update quantity
     public function updateQuantity(Request $request, $id)
     {
         $cart = session()->get('cart', []);
+
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $request->quantity;
+            // Convert quantity to integer to avoid string issues
+            $cart[$id]['quantity'] = intval($request->quantity);
             session()->put('cart', $cart);
         }
 
-        return redirect()->back()->with('success', 'Cart updated successfully!');
+        // Return JSON response for AJAX
+        return response()->json(['success' => true, 'cart' => $cart]);
     }
+
+    public function addToUserCart(Request $request, $userId, $productId)
+{
+    // Prevent User A from editing User B's cart
+    if (Auth::id() != $userId) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Validate data
+    $request->validate([
+        'quantity' => 'required|integer|min:1'
+    ]);
+
+        // Add to cart
+        $cart = Cart::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'product_id' => $productId
+            ],
+            [
+                'quantity' => $request->quantity
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item added to cart',
+            'data' => $cart
+        ]);
+    }
+
+
 }

@@ -15,6 +15,12 @@
                 @csrf
 
                 <div class="mb-4">
+                    <label class="block">Product ID</label>
+                    <input type="text" name="id" class="w-full border rounded px-2 py-1" value="{{ old('id', $product->id ?? '') }}">
+
+                </div>
+
+                <div class="mb-4">
                     <label class="block">Name</label>
                     <input type="text" name="name" class="w-full border rounded px-2 py-1">
                 </div>
@@ -55,6 +61,11 @@
                 <div class="mb-4">
                     <label class="block">Image</label>
                     <input type="file" name="image">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block">Or Enter Image URL/Path</label>
+                    <input type="text" name="image_url" class="w-full border rounded px-2 py-1" placeholder="https://example.com/image.jpg">
                 </div>
 
                 <button type="submit" class="bg-[#49608a] text-white px-4 py-2 rounded hover:bg-[#3a4e73]">Save</button>

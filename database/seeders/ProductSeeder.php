@@ -4,13 +4,29 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Products;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
 
-        DB::table('products')->truncate(); //clear existing data before updating database cuz i dont want to create any duplicates.
+        //DB::table('products')->truncate(); //clear existing data before updating database cuz i dont want to create any duplicates.
+
+        // Disable foreign key checks
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+            // Clear table
+            Products::query()->delete();
+
+            // Enable foreign key checks
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Insert products
+            Products::insert([
+                ['id' => 'P001', 'name' => 'Notebook', 'category' => 'Cute', 'color' => 'Pink', 'description' => 'Cute pink notebook', 'price' => 500, 'quantity' => 10, 'image' => 'notebook1.jpg', 'isBestSeller' => 0],
+                // Add more products here
+            ]);
 
         DB::table('products')->insert([
             ['id' => 'L10', 'name' => 'Chen Chin Ling', 'price' => 4000, 'image' => 'products/L10.webp', 'category' => 'eastern', 'color' => 'WHITE', 'description' => 'A serene and elegant journal inspired by traditional Eastern artistry.', 'quantity' => 40, 'isBestSeller' => 0],

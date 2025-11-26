@@ -50,7 +50,27 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::loginView(function () {
             return view('auth.login');
+
         });
+
+        Fortify::authenticateUsing(function (Request $request) {
+            // Custom validation
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string|min:8',
+            ]);
+
+            // Find user by email
+            $user = \App\Models\User::where('email', $request->email)->first();
+
+            // Check password
+            if ($user && \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                return $user;
+            }
+
+            return null; // Login fails if credentials don't match
+        });
+
 
         $this->app->singleton(LoginResponse::class, function () {
             return new class implements LoginResponse {

@@ -35,10 +35,11 @@
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
                 <select name="payment_method" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]" required>
-                    <option value="">Select Payment Method</option>
                     <option value="Cash on Delivery">Cash on Delivery</option>
+                    <option value="Card">Card (Credit/Debit)</option>
                 </select>
             </div>
+
 
             <div class="border-t border-gray-200 pt-4 text-right">
                 <p class="text-lg font-medium text-gray-800 mb-4">

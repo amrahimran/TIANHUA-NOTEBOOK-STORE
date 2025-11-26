@@ -76,10 +76,15 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ quantity })
-            }).then(response => {
-                if (response.ok) location.reload();
+                body: JSON.stringify({ quantity: parseInt(quantity) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // refresh to show updated quantity
+                }
             });
         }
+
     </script>
 </x-app-layout>

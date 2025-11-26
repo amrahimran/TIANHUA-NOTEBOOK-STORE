@@ -9,6 +9,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -54,6 +55,8 @@ Route::middleware(['auth'])->group(function () {
 // Cart Page
 
 Route::get('/profile/products/cart', [CartController::class, 'index'])->name('cart');
+Route::post('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+
 
 
 Route::middleware(['auth'])->group(function () {
@@ -90,3 +93,11 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
 });
 
 
+Route::post('product/{id}/review', [ReviewController::class, 'store'])->name('reviews.store');
+Route::delete('review/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+Route::get('product/{id}', [ProductController::class, 'show'])->name('product.show');
+
+
+Route::get('/csrf-token', function () {
+    return ['csrf_token' => csrf_token()];
+});

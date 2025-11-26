@@ -13,6 +13,11 @@
 
                 <div class="mb-4">
                     <label class="block">Name</label>
+                    <input type="text" name="id" class="w-full border rounded px-2 py-1" value="{{ old('id', $product->id ?? '') }}">
+                </div>
+               
+                <div class="mb-4">
+                    <label class="block">Name</label>
                     <input type="text" name="name" value="{{ $product->name }}" class="w-full border rounded px-2 py-1">
                 </div>
 

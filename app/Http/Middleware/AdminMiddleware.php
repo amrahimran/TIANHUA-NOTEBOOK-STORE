@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Middleware;
-
 
 use Closure;
 use Illuminate\Http\Request;
@@ -15,6 +13,8 @@ class AdminMiddleware
             return $next($request);
         }
 
-        abort(403, 'Unauthorized'); // or redirect somewhere else
+        return response()->json([
+            'error' => 'Unauthorized.'
+        ], 403);
     }
 }

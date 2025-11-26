@@ -7,9 +7,7 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
-    /**
-     * The application's global HTTP middleware stack.
-     */
+
     protected $middleware = [
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
@@ -17,9 +15,6 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
-    /**
-     * The application's route middleware groups.
-     */
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
@@ -29,27 +24,20 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
-
         'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:60,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
-    ];
 
-    /**
-     * The application's route middleware.
-     */
-    // protected $routeMiddleware = [
-    //     'auth' => \App\Http\Middleware\Authenticate::class,
-    //     'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-    //     'admin' => \App\Http\Middleware\AdminMiddleware::class,
-    //     'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class
-    // ];
+    ];
 
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
+
+        
 
     ];
 
