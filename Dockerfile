@@ -1,40 +1,40 @@
-# ---- Build Stage ----
-FROM php:8.2-fpm AS build
+# Use official PHP image with required extensions
+FROM php:8.2-cli
 
-# Install system dependencies
+# Install system packages
 RUN apt-get update && apt-get install -y \
-    git curl unzip libpng-dev libonig-dev libxml2-dev libzip-dev zip libicu-dev \
-    && docker-php-ext-install pdo pdo_mysql zip intl
+    curl \
+    unzip \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install MongoDB PHP extension
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
+
+# Install Laravel required extensions
+RUN docker-php-ext-install pdo pdo_mysql
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy app source
+# Set working directory
 WORKDIR /var/www/html
+
+# Copy project files
 COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Build Laravel caches
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+# Laravel optimization (optional but good)
+RUN php artisan config:cache || true
+RUN php artisan route:cache || true
+RUN php artisan view:cache || true
 
-
-# ---- Production Stage ----
-FROM php:8.2-fpm
-
-WORKDIR /var/www/html
-
-# Install required PHP extensions again
-RUN apt-get update && apt-get install -y \
-    libpng-dev libonig-dev libxml2-dev libzip-dev libicu-dev \
-    && docker-php-ext-install pdo pdo_mysql zip intl
-
-# Copy built app
-COPY --from=build /var/www/html /var/www/html
-
-# Expose port Railway uses
+# Expose port (Railway assigns dynamically)
 EXPOSE 8080
 
-# Start command (Railway sets PORT=8080)
-CMD php artisan serve --host=0.0.0.0 --port=8080
+# Start server
+CMD php artisan serve --host=0.0.0.0 --port=${PORT}
