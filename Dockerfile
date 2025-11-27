@@ -1,54 +1,40 @@
-# =========================
-# Stage 1: Build frontend
-# =========================
-FROM node:20 AS node-builder
+# ---- Build Stage ----
+FROM php:8.2-fpm AS build
 
-WORKDIR /app
-
-# Copy Node package files
-COPY package*.json ./
-
-# Install Node dependencies
-RUN npm install
-
-# Copy the entire Laravel project for Vite
-COPY . .
-
-# Build Vite assets for Laravel
-RUN npm run build
-
-# =========================
-# Stage 2: PHP / Laravel
-# =========================
-FROM php:8.2-fpm
-
-WORKDIR /var/www
-
-# Install system dependencies & PHP extensions
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev libcurl4-openssl-dev pkg-config libssl-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+    git curl unzip libpng-dev libonig-dev libxml2-dev libzip-dev zip libicu-dev \
+    && docker-php-ext-install pdo pdo_mysql zip intl
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy Laravel project
+# Copy app source
+WORKDIR /var/www/html
 COPY . .
 
-# Copy built Vite assets from Node stage
-COPY --from=node-builder /app/public/build ./public/build
-
 # Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions for storage, cache, and built assets
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/public/build
+# Build Laravel caches
+RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
 
-# Clear and cache Laravel configs
-RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && php artisan config:cache
 
-# Expose port (Railway will route automatically)
-EXPOSE 9000
+# ---- Production Stage ----
+FROM php:8.2-fpm
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+WORKDIR /var/www/html
+
+# Install required PHP extensions again
+RUN apt-get update && apt-get install -y \
+    libpng-dev libonig-dev libxml2-dev libzip-dev libicu-dev \
+    && docker-php-ext-install pdo pdo_mysql zip intl
+
+# Copy built app
+COPY --from=build /var/www/html /var/www/html
+
+# Expose port Railway uses
+EXPOSE 8080
+
+# Start command (Railway sets PORT=8080)
+CMD php artisan serve --host=0.0.0.0 --port=8080
