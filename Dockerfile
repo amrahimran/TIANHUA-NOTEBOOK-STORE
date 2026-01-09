@@ -1,9 +1,8 @@
-# Use official PHP image with required extensions
 FROM php:8.2-cli
 
-# Install system packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    curl \
+    git \
     unzip \
     libssl-dev \
     pkg-config \
@@ -13,28 +12,27 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install mongodb \
     && docker-php-ext-enable mongodb
 
-# Install Laravel required extensions
+# Install other required PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# Working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy app files
 COPY . .
 
-# Install PHP dependencies
+# Install dependencies
+RUN composer update
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravel optimization (optional but good)
+# Cache optimizations
 RUN php artisan config:cache || true
 RUN php artisan route:cache || true
 RUN php artisan view:cache || true
 
-# Expose port (Railway assigns dynamically)
 EXPOSE 8080
 
-# Start server
 CMD php artisan serve --host=0.0.0.0 --port=${PORT}

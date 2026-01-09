@@ -30,6 +30,7 @@ class AuthController extends Controller
             'user'  => $user,
             'token' => $token
         ]);
+        
     }
 
     // User Registration
