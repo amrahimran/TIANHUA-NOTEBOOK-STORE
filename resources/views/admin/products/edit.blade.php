@@ -5,6 +5,10 @@
         </h2>
     </x-slot>
 
+     <x-nav-link :href="route('admin.products.index')" class="ml-8 mt-4">
+        Back To Products Dashboard
+    </x-nav-link>
+
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
