@@ -127,6 +127,15 @@ class ProductController extends Controller
                 });
             }
 
+            $sort = $request->input('sort');
+
+            if ($sort === 'low_high') {
+                $query->orderBy('price', 'asc');
+            } elseif ($sort === 'high_low') {
+                $query->orderBy('price', 'desc');
+            }
+
+
             $products = $query->get();
 
             return view('products', compact('products'));

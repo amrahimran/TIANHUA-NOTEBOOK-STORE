@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WishlistController;
@@ -25,7 +26,12 @@ Route::middleware([
 
 Route::get('product/details/{id}', [ProductController::class, 'product.details'])->name('details');
 
-Route::get('/profile/products', [ProductController::class, 'index'])->name('products.index');
+//Route::get('/profile/products', [ProductController::class, 'index'])->name('products.index');
+
+Route::get('/profile/products', [ProductController::class, 'index'])
+    ->name('profile.products.index');
+
+
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
 
 
@@ -34,9 +40,13 @@ Route::get('/profile/myorders', function () {
     return view('myorders', compact('orders'));
 })->name('myorders')->middleware('auth');
 
-Route::get('/profile/about', function () {
-    return view('profile.about');
-})->name('about');
+// Route::get('/profile/about', function () {
+//     return view('profile.about');
+// })->name('about');
+
+Route::get('/profile/about', [App\Http\Controllers\AboutUsController::class, 'index'])->name('about');
+
+
 
 Route::get('/profile/contact', function () {
     return view('profile.contact');
@@ -44,6 +54,7 @@ Route::get('/profile/contact', function () {
 
 // Handle contact form submission
 Route::post('/profile/contact', [ContactController::class, 'submit'])->name('contact.submit');
+
 
 
 Route::middleware(['auth'])->group(function () {
@@ -101,3 +112,20 @@ Route::get('product/{id}', [ProductController::class, 'show'])->name('product.sh
 Route::get('/csrf-token', function () {
     return ['csrf_token' => csrf_token()];
 });
+
+
+use Illuminate\Support\Facades\Http;
+Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+
+Route::get('/payment/success', function () {
+    return 'Payment completed successfully! (sandbox demo)';
+})->name('payment.success');
+
+Route::get('/payment/cancel', function () {
+    return 'Payment was cancelled.';
+})->name('payment.cancel');
+
+Route::post('/payment/notify', function () {
+    Log::info(request()->all());
+    return response('OK', 200);
+})->name('payment.notify');

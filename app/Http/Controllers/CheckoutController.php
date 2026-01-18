@@ -23,6 +23,7 @@ class CheckoutController extends Controller
 
     public function placeOrder(Request $request)
     {
+        // Validate input
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
@@ -32,17 +33,16 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string',
         ]);
 
-        // Get the cart from session
+        // Get cart from session
         $cart = session()->get('cart', []);
-
         if (empty($cart)) {
-            return redirect()->back()->with('error', 'Your cart is empty!');
+            return redirect()->back()->withInput()->with('error', 'Your cart is empty!');
         }
 
         // Calculate total
         $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
-        // Create the order
+        // Save order
         $order = Order::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
@@ -52,6 +52,7 @@ class CheckoutController extends Controller
             'city' => $request->city,
             'payment_method' => $request->payment_method,
             'total' => $total,
+            'status' => 'pending',
         ]);
 
         // Save order items and update stock
@@ -63,7 +64,6 @@ class CheckoutController extends Controller
                 'price' => $item['price'],
             ]);
 
-            // Reduce product stock
             $product = Products::find($productId);
             if ($product) {
                 $product->quantity = max(0, $product->quantity - $item['quantity']);
@@ -71,9 +71,35 @@ class CheckoutController extends Controller
             }
         }
 
-        // Clear cart
-        session()->forget('cart');
+        // Clear cart for COD or after redirecting
+        if ($request->payment_method !== 'card') {
+            session()->forget('cart');
+        }
 
+        // Handle Demo Card Payment
+        if ($request->payment_method === 'card') {
+            // Validate demo card inputs
+            $request->validate([
+                'card_number' => ['required', 'regex:/^[0-9 ]{16,19}$/'],
+                'expiry'      => ['required', 'date_format:m/y'],
+                'cvv'         => ['required', 'digits:3'],
+            ]);
+
+            // Simulate processing
+            sleep(1);
+
+            // Update order status
+            $order->update(['status' => 'paid']);
+
+            session()->forget('cart');
+
+            // return redirect()->route('payment.success')->with('success', 'Payment successful (Demo Mode)');
+            return redirect()->route('myorders')->with('success', 'Payment successful');
+
+        }
+
+
+        // COD
         return redirect()->route('myorders')->with('success', 'Your order has been placed successfully!');
     }
 }

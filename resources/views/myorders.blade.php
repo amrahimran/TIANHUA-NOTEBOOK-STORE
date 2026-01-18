@@ -15,7 +15,22 @@
         @else
             @foreach($orders as $order)
                 <div class="bg-white shadow-lg rounded-2xl p-6 mb-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Order #{{ $order->id }}</h3>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-semibold text-gray-800">Order #{{ $order->id }}</h3>
+                        <!-- Order Status Badge -->
+                        @php
+                            $statusColor = match($order->status) {
+                                'pending' => 'bg-yellow-100 text-yellow-800',
+                                'paid' => 'bg-green-100 text-green-800',
+                                'cancelled' => 'bg-red-100 text-red-800',
+                                default => 'bg-gray-100 text-gray-800',
+                            };
+                        @endphp
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $statusColor }}">
+                            {{ ucfirst($order->status) }}
+                        </span>
+                    </div>
+
                     <p class="text-gray-600">Placed on {{ $order->created_at->format('M d, Y') }}</p>
                     <p class="text-gray-600 mb-3">Payment: {{ $order->payment_method }}</p>
 
