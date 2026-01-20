@@ -2,115 +2,303 @@
     <main class="max-w-4xl mx-auto p-6 font-roboto">
         <h2 class="text-3xl font-bold text-[#49608a] mb-6">Checkout</h2>
 
-        {{-- Show error --}}
+        {{-- Show error/success messages --}}
         @if(session('error'))
             <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
                 {{ session('error') }}
             </div>
         @endif
+        
+        @if(session('success'))
+            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
 
         {{-- CART SUMMARY --}}
-        {{-- CART SUMMARY --}}
-<div class="bg-white shadow-lg rounded-2xl p-4 mb-6">
-    <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Order</h3>
-    @if(!empty($cart))
-        <div class="space-y-3">
-            @foreach($cart as $productId => $item)
-                <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <div class="flex items-center gap-3">
-                        @if(!empty($item['image']))
-                            <img src="{{ asset($item['image']) }}" alt="{{ $item['name'] }}" class="w-14 h-14 object-cover rounded">
-                        @else
-                            <div class="w-14 h-14 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-sm">No Image</div>
-                        @endif
-                        <div>
-                            <p class="font-medium text-gray-700">{{ $item['name'] }}</p>
-                            <p class="text-sm text-gray-500">Qty: {{ $item['quantity'] }}</p>
+        <div class="bg-white shadow-lg rounded-2xl p-6 mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Order</h3>
+            @if(!empty($cart))
+                <div class="space-y-3">
+                    @foreach($cart as $productId => $item)
+                        <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                            <div class="flex items-center gap-3">
+                                @if(!empty($item['image']))
+                                    <img src="{{ asset($item['image']) }}" alt="{{ $item['name'] }}" class="w-14 h-14 object-cover rounded">
+                                @else
+                                    <div class="w-14 h-14 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-sm">No Image</div>
+                                @endif
+                                <div>
+                                    <p class="font-medium text-gray-700">{{ $item['name'] }}</p>
+                                    <p class="text-sm text-gray-500">Qty: {{ $item['quantity'] }}</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-800 font-semibold">
+                                Rs. {{ number_format($item['price'] * $item['quantity'], 2) }}
+                            </p>
                         </div>
-                    </div>
-                    <p class="text-gray-800 font-semibold">
-                        Rs. {{ number_format($item['price'] * $item['quantity'], 2) }}
-                    </p>
+                    @endforeach
                 </div>
-            @endforeach
+                <div class="flex justify-between items-center mt-4 border-t border-gray-200 pt-2">
+                    <p class="font-bold text-gray-800">Total</p>
+                    <p class="font-bold text-[#49608a] text-xl">Rs. {{ number_format($total, 2) }}</p>
+                </div>
+            @else
+                <p class="text-gray-500">Your cart is empty.</p>
+            @endif
         </div>
-        <div class="flex justify-between items-center mt-4 border-t border-gray-200 pt-2">
-            <p class="font-bold text-gray-800">Total</p>
-            <p class="font-bold text-[#49608a]">Rs. {{ number_format($total, 2) }}</p>
-        </div>
-    @else
-        <p class="text-gray-500">Your cart is empty.</p>
-    @endif
-</div>
-
 
         {{-- CHECKOUT FORM --}}
-        <form action="{{ route('checkout.placeOrder') }}" method="POST" class="bg-white shadow-lg rounded-2xl p-6 space-y-4">
+        <form action="{{ route('checkout.placeOrder') }}" method="POST" class="bg-white shadow-lg rounded-2xl p-6 space-y-4" id="checkout-form">
             @csrf
 
-            <div>
-                <label class="block text-gray-700 font-semibold">Full Name</label>
-                <input type="text" name="name" value="{{ old('name', auth()->user()->name ?? '') }}"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]" required>
+            {{-- Personal Details --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Full Name *</label>
+                    <input type="text" name="name" value="{{ old('name', auth()->user()->name ?? '') }}"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition" required>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Email *</label>
+                    <input type="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition" required>
+                </div>
             </div>
 
             <div>
-                <label class="block text-gray-700 font-semibold">Email</label>
-                <input type="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]" required>
+                <label class="block text-gray-700 font-semibold mb-1">Phone Number *</label>
+                <input type="tel" name="phone" value="{{ old('phone') }}"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition" required>
             </div>
 
             <div>
-                <label class="block text-gray-700 font-semibold">Phone</label>
-                <input type="text" name="phone" value="{{ old('phone') }}"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]" required>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-semibold">Address</label>
+                <label class="block text-gray-700 font-semibold mb-1">Address *</label>
                 <input type="text" name="address" value="{{ old('address') }}"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]" required>
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition" required>
             </div>
 
             <div>
-                <label class="block text-gray-700 font-semibold">City</label>
+                <label class="block text-gray-700 font-semibold mb-1">City *</label>
                 <input type="text" name="city" value="{{ old('city') }}"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]" required>
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition" required>
             </div>
 
-            <div>
-                <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
-                <select name="payment_method" required>
+            {{-- Payment Method --}}
+            <div class="pt-4 border-t border-gray-200">
+                <label class="block text-gray-700 font-semibold mb-3">Payment Method *</label>
+                <select name="payment_method" id="payment_method" 
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition" required>
+                    <option value="" disabled {{ old('payment_method') ? '' : 'selected' }}>Select Payment Method</option>
                     <option value="cod" {{ old('payment_method') === 'cod' ? 'selected' : '' }}>Cash on Delivery</option>
-                    <option value="card" {{ old('payment_method') === 'card' ? 'selected' : '' }}>Card</option>
+                    <option value="card" {{ old('payment_method') === 'card' ? 'selected' : '' }}>Credit/Debit Card</option>
                 </select>
             </div>
 
-            <!-- DEMO CARD FIELDS -->
-            <div id="card-fields" style="display:none; margin-top: 1rem;">
-                <input type="text" name="card_number" placeholder="Card Number" maxlength="16"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 mb-2 focus:ring-2 focus:ring-[#49608a]">
-                <input type="text" name="expiry" placeholder="MM/YY"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 mb-2 focus:ring-2 focus:ring-[#49608a]">
-                <input type="text" name="cvv" placeholder="CVV" maxlength="3"
-                    class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#49608a]">
+            {{-- Card Fields (Hidden by default) --}}
+            <div id="card-fields" class="hidden space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200 mt-4">
+                {{-- Test Card Info Box --}}
+                {{-- <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="text-blue-500 mr-2 mt-0.5">💳</div>
+                        <div>
+                            <h4 class="font-semibold text-blue-800 mb-1">Test Card Details (Demo Mode)</h4>
+                            <p class="text-sm text-blue-600">Use these details for testing. No real payment will be processed.</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="font-medium">Card Number:</span>
+                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">4242 4242 4242 4242</code>
+                        </div>
+                        <div>
+                            <span class="font-medium">Expiry Date:</span>
+                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">12/30</code>
+                        </div>
+                        <div>
+                            <span class="font-medium">CVV:</span>
+                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">123</code>
+                        </div>
+                        <div>
+                            <span class="font-medium">ZIP Code:</span>
+                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">12345</code>
+                        </div>
+                    </div>
+                </div> --}}
+
+                {{-- Card Input Fields --}}
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1">Card Number *</label>
+                        <input type="text" name="card_number" id="card_number" 
+                            placeholder="1234 5678 9012 3456" maxlength="19"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition card-input">
+                        <div id="card-number-error" class="text-red-500 text-sm mt-1 hidden">Invalid card number</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">Expiry Date (MM/YY) *</label>
+                            <input type="text" name="expiry" id="expiry" 
+                                placeholder="MM/YY" maxlength="5"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition">
+                            <div id="expiry-error" class="text-red-500 text-sm mt-1 hidden">Invalid expiry date</div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">CVV *</label>
+                            <input type="password" name="cvv" id="cvv" 
+                                placeholder="123" maxlength="4"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition">
+                            <div id="cvv-error" class="text-red-500 text-sm mt-1 hidden">Invalid CVV</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1">Cardholder Name *</label>
+                        <input type="text" name="cardholder_name" id="cardholder_name" 
+                            placeholder="John Doe"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition">
+                    </div>
+                </div>
             </div>
 
-            <script>
-                document.querySelector('[name="payment_method"]').addEventListener('change', function () {
-                    document.getElementById('card-fields').style.display =
-                        this.value === 'card' ? 'block' : 'none';
-                });
-            </script>
-
-            <div class="border-t border-gray-200 pt-4 text-right">
-                <p class="text-lg font-medium text-gray-800 mb-4">
-                    Total: <span class="text-[#49608a] font-semibold">Rs. {{ number_format($total, 2) }}</span>
-                </p>
-                <button type="submit" class="bg-[#49608a] text-white px-8 py-3 rounded-xl hover:bg-[#3a4e73] transition shadow-md">
-                    Buy Now
+            {{-- Order Summary & Submit --}}
+            <div class="border-t border-gray-200 pt-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <p class="text-lg font-medium text-gray-800">Order Total</p>
+                        <p class="text-sm text-gray-500">Including all taxes</p>
+                    </div>
+                    <p class="text-2xl font-bold text-[#49608a]">Rs. {{ number_format($total, 2) }}</p>
+                </div>
+                
+                <button type="submit" id="submit-btn" 
+                    class="w-full bg-[#49608a] text-white px-8 py-4 rounded-xl hover:bg-[#3a4e73] transition-all duration-300 shadow-md hover:shadow-lg font-semibold text-lg">
+                    Place Order
                 </button>
+                
+                <p class="text-center text-gray-500 text-sm mt-4">
+                    By placing your order, you agree to our Terms of Service and Privacy Policy
+                </p>
             </div>
         </form>
     </main>
+
+    <script>
+        // Show/hide card fields based on payment method
+        document.getElementById('payment_method').addEventListener('change', function() {
+            const cardFields = document.getElementById('card-fields');
+            if (this.value === 'card') {
+                cardFields.classList.remove('hidden');
+                cardFields.classList.add('block');
+            } else {
+                cardFields.classList.remove('block');
+                cardFields.classList.add('hidden');
+            }
+        });
+
+        // Auto-format card number with spaces
+        document.getElementById('card_number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            
+            e.target.value = formatted.substring(0, 19);
+        });
+
+        // Auto-format expiry date
+        document.getElementById('expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                e.target.value = value;
+            }
+        });
+
+        // Form validation
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            const paymentMethod = document.getElementById('payment_method').value;
+            
+            if (paymentMethod === 'card') {
+                // Get card values
+                const cardNumber = document.getElementById('card_number').value.replace(/\s+/g, '');
+                const expiry = document.getElementById('expiry').value;
+                const cvv = document.getElementById('cvv').value;
+                const cardholderName = document.getElementById('cardholder_name').value;
+                
+                // Reset errors
+                document.querySelectorAll('[id$="-error"]').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                
+                let isValid = true;
+                
+                // Validate card number (simple Luhn check for demo)
+                if (!cardNumber || cardNumber.length < 16) {
+                    document.getElementById('card-number-error').textContent = 'Please enter a valid card number';
+                    document.getElementById('card-number-error').classList.remove('hidden');
+                    isValid = false;
+                }
+                
+                // Validate expiry date
+                if (!expiry || !expiry.match(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/)) {
+                    document.getElementById('expiry-error').textContent = 'Please enter a valid expiry date (MM/YY)';
+                    document.getElementById('expiry-error').classList.remove('hidden');
+                    isValid = false;
+                }
+                
+                // Validate CVV
+                if (!cvv || cvv.length < 3) {
+                    document.getElementById('cvv-error').textContent = 'Please enter a valid CVV';
+                    document.getElementById('cvv-error').classList.remove('hidden');
+                    isValid = false;
+                }
+                
+                // Validate cardholder name
+                if (!cardholderName || cardholderName.trim().length < 2) {
+                    alert('Please enter the cardholder name');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                } else {
+                    // Show processing message
+                    const submitBtn = document.getElementById('submit-btn');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing Payment...</span>';
+                    
+                    // Auto-fill with test data for demo if empty
+                    if (cardNumber === '') {
+                        document.getElementById('card_number').value = '4242 4242 4242 4242';
+                    }
+                    if (expiry === '') {
+                        document.getElementById('expiry').value = '12/30';
+                    }
+                    if (cvv === '') {
+                        document.getElementById('cvv').value = '123';
+                    }
+                    if (!cardholderName) {
+                        document.getElementById('cardholder_name').value = document.querySelector('[name="name"]').value || 'John Doe';
+                    }
+                }
+            }
+        });
+
+        // Trigger change event on page load if card was previously selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethod = document.getElementById('payment_method');
+            if (paymentMethod.value === 'card') {
+                paymentMethod.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 </x-app-layout>
