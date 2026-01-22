@@ -62,7 +62,7 @@ class OrderController extends Controller
             'payment_method' => 'required|string|max:50',
             'total' => 'required|numeric',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|string', // matches your products.id
+            'items.*.product_id' => 'required|string', 
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:0',
         ]);

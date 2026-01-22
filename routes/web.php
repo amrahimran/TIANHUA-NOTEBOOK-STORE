@@ -116,6 +116,7 @@ Route::get('/csrf-token', function () {
 
 use Illuminate\Support\Facades\Http;
 Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+Route::post('/stripe/create-intent', [CheckoutController::class, 'createPaymentIntent'])->name('stripe.create-intent');
 
 Route::get('/payment/success', function () {
     return 'Payment completed successfully! (sandbox demo)';

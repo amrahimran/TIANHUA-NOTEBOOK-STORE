@@ -21,6 +21,35 @@ class CheckoutController extends Controller
         return view('checkout.index', compact('cart', 'total'));
     }
 
+    public function createPaymentIntent(Request $request)
+    {
+        $cart = session()->get('cart', []);
+        if (empty($cart)) {
+            return response()->json(['error' => 'Cart is empty'], 400);
+        }
+
+        $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $amount = round($total * 100); // Amount in cents
+
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        try {
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => $amount,
+                'currency' => 'lkr', // Assuming LKR based on "Rs." in view
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                ],
+            ]);
+
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function placeOrder(Request $request)
     {
         // Validate input
@@ -71,35 +100,16 @@ class CheckoutController extends Controller
             }
         }
 
-        // Clear cart for COD or after redirecting
-        if ($request->payment_method !== 'card') {
-            session()->forget('cart');
-        }
-
-        // Handle Demo Card Payment
+        // Handle Card Payment
         if ($request->payment_method === 'card') {
-            // Validate demo card inputs
-            $request->validate([
-                'card_number' => ['required', 'regex:/^[0-9 ]{16,19}$/'],
-                'expiry'      => ['required', 'date_format:m/y'],
-                'cvv'         => ['required', 'digits:3'],
-            ]);
-
-            // Simulate processing
-            sleep(1);
-
-            // Update order status
+            // In a real app, you might verify the payment_intent_id here
+            // For now, we assume the frontend has successfully confirmed the payment
             $order->update(['status' => 'paid']);
-
-            session()->forget('cart');
-
-            // return redirect()->route('payment.success')->with('success', 'Payment successful (Demo Mode)');
-            return redirect()->route('myorders')->with('success', 'Payment successful');
-
         }
 
+        // Clear cart
+        session()->forget('cart');
 
-        // COD
         return redirect()->route('myorders')->with('success', 'Your order has been placed successfully!');
     }
 }

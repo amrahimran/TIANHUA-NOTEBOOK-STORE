@@ -96,71 +96,24 @@
                 </select>
             </div>
 
-            {{-- Card Fields (Hidden by default) --}}
+            {{-- Card Fields (Stripe) --}}
             <div id="card-fields" class="hidden space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200 mt-4">
-                {{-- Test Card Info Box --}}
-                {{-- <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex items-start">
-                        <div class="text-blue-500 mr-2 mt-0.5">💳</div>
-                        <div>
-                            <h4 class="font-semibold text-blue-800 mb-1">Test Card Details (Demo Mode)</h4>
-                            <p class="text-sm text-blue-600">Use these details for testing. No real payment will be processed.</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <span class="font-medium">Card Number:</span>
-                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">4242 4242 4242 4242</code>
-                        </div>
-                        <div>
-                            <span class="font-medium">Expiry Date:</span>
-                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">12/30</code>
-                        </div>
-                        <div>
-                            <span class="font-medium">CVV:</span>
-                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">123</code>
-                        </div>
-                        <div>
-                            <span class="font-medium">ZIP Code:</span>
-                            <code class="block bg-white p-1 rounded border text-gray-700 mt-1">12345</code>
-                        </div>
-                    </div>
-                </div> --}}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <h4 class="font-bold text-yellow-800 mb-2">💳 Pay with Stripe:</h4>
+                    <!-- <ul class="text-sm text-yellow-700 space-y-1">
+                        <li><strong>Card Number:</strong> 4242 4242 4242 4242</li>
+                        <li><strong>Expiry Date:</strong> Any future date</li>
+                        <li><strong>CVC:</strong> Any 3 digits</li>
+                        <li><strong>ZIP:</strong> Any 5 digits</li>
+                    </ul> -->
+                </div>
 
-                {{-- Card Input Fields --}}
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Card Number *</label>
-                        <input type="text" name="card_number" id="card_number" 
-                            placeholder="1234 5678 9012 3456" maxlength="19"
-                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition card-input">
-                        <div id="card-number-error" class="text-red-500 text-sm mt-1 hidden">Invalid card number</div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">Card Information</label>
+                    <div id="card-element" class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white">
+                        <!-- Stripe Element will be inserted here -->
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1">Expiry Date (MM/YY) *</label>
-                            <input type="text" name="expiry" id="expiry" 
-                                placeholder="MM/YY" maxlength="5"
-                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition">
-                            <div id="expiry-error" class="text-red-500 text-sm mt-1 hidden">Invalid expiry date</div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-1">CVV *</label>
-                            <input type="password" name="cvv" id="cvv" 
-                                placeholder="123" maxlength="4"
-                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition">
-                            <div id="cvv-error" class="text-red-500 text-sm mt-1 hidden">Invalid CVV</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Cardholder Name *</label>
-                        <input type="text" name="cardholder_name" id="cardholder_name" 
-                            placeholder="John Doe"
-                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#49608a] focus:border-transparent transition">
-                    </div>
+                    <div id="card-errors" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
                 </div>
             </div>
 
@@ -186,118 +139,136 @@
         </form>
     </main>
 
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
+        // Initialize Stripe
+        const stripe = Stripe('{{ env("STRIPE_KEY") }}');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                    fontFamily: '"Roboto", sans-serif',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#fa755a',
+                    iconColor: '#fa755a'
+                }
+            }
+        });
+        cardElement.mount('#card-element');
+
+        // Handle real-time validation errors
+        cardElement.on('change', function(event) {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+                displayError.classList.remove('hidden');
+            } else {
+                displayError.textContent = '';
+                displayError.classList.add('hidden');
+            }
+        });
+
         // Show/hide card fields based on payment method
-        document.getElementById('payment_method').addEventListener('change', function() {
-            const cardFields = document.getElementById('card-fields');
-            if (this.value === 'card') {
+        const paymentMethodSelect = document.getElementById('payment_method');
+        const cardFields = document.getElementById('card-fields');
+        
+        function toggleCardFields() {
+            if (paymentMethodSelect.value === 'card') {
                 cardFields.classList.remove('hidden');
                 cardFields.classList.add('block');
             } else {
                 cardFields.classList.remove('block');
                 cardFields.classList.add('hidden');
             }
-        });
+        }
 
-        // Auto-format card number with spaces
-        document.getElementById('card_number').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let formatted = '';
-            
-            for (let i = 0; i < value.length; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += value[i];
-            }
-            
-            e.target.value = formatted.substring(0, 19);
-        });
+        paymentMethodSelect.addEventListener('change', toggleCardFields);
+        
+        // Initial check
+        if (paymentMethodSelect.value === 'card') {
+            toggleCardFields();
+        }
 
-        // Auto-format expiry date
-        document.getElementById('expiry').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9]/g, '');
-            
-            if (value.length >= 2) {
-                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            } else {
-                e.target.value = value;
-            }
-        });
+        // Form submission
+        const form = document.getElementById('checkout-form');
+        const submitBtn = document.getElementById('submit-btn');
 
-        // Form validation
-        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             const paymentMethod = document.getElementById('payment_method').value;
             
             if (paymentMethod === 'card') {
-                // Get card values
-                const cardNumber = document.getElementById('card_number').value.replace(/\s+/g, '');
-                const expiry = document.getElementById('expiry').value;
-                const cvv = document.getElementById('cvv').value;
-                const cardholderName = document.getElementById('cardholder_name').value;
+                e.preventDefault();
                 
-                // Reset errors
-                document.querySelectorAll('[id$="-error"]').forEach(el => {
-                    el.classList.add('hidden');
-                });
-                
-                let isValid = true;
-                
-                // Validate card number (simple Luhn check for demo)
-                if (!cardNumber || cardNumber.length < 16) {
-                    document.getElementById('card-number-error').textContent = 'Please enter a valid card number';
-                    document.getElementById('card-number-error').classList.remove('hidden');
-                    isValid = false;
-                }
-                
-                // Validate expiry date
-                if (!expiry || !expiry.match(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/)) {
-                    document.getElementById('expiry-error').textContent = 'Please enter a valid expiry date (MM/YY)';
-                    document.getElementById('expiry-error').classList.remove('hidden');
-                    isValid = false;
-                }
-                
-                // Validate CVV
-                if (!cvv || cvv.length < 3) {
-                    document.getElementById('cvv-error').textContent = 'Please enter a valid CVV';
-                    document.getElementById('cvv-error').classList.remove('hidden');
-                    isValid = false;
-                }
-                
-                // Validate cardholder name
-                if (!cardholderName || cardholderName.trim().length < 2) {
-                    alert('Please enter the cardholder name');
-                    isValid = false;
-                }
-                
-                if (!isValid) {
-                    e.preventDefault();
-                } else {
-                    // Show processing message
-                    const submitBtn = document.getElementById('submit-btn');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing Payment...</span>';
-                    
-                    // Auto-fill with test data for demo if empty
-                    if (cardNumber === '') {
-                        document.getElementById('card_number').value = '4242 4242 4242 4242';
-                    }
-                    if (expiry === '') {
-                        document.getElementById('expiry').value = '12/30';
-                    }
-                    if (cvv === '') {
-                        document.getElementById('cvv').value = '123';
-                    }
-                    if (!cardholderName) {
-                        document.getElementById('cardholder_name').value = document.querySelector('[name="name"]').value || 'John Doe';
-                    }
-                }
-            }
-        });
+                // Disable button and show loading state
+                submitBtn.disabled = true;
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing Payment...</span>';
 
-        // Trigger change event on page load if card was previously selected
-        document.addEventListener('DOMContentLoaded', function() {
-            const paymentMethod = document.getElementById('payment_method');
-            if (paymentMethod.value === 'card') {
-                paymentMethod.dispatchEvent(new Event('change'));
+                try {
+                    // 1. Create Payment Intent
+                    const response = await fetch('{{ route("stripe.create-intent") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({})
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // 2. Confirm Card Payment
+                    const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
+                        payment_method: {
+                            card: cardElement,
+                            billing_details: {
+                                name: document.querySelector('input[name="name"]').value,
+                                email: document.querySelector('input[name="email"]').value,
+                                phone: document.querySelector('input[name="phone"]').value,
+                                address: {
+                                    line1: document.querySelector('input[name="address"]').value,
+                                    city: document.querySelector('input[name="city"]').value,
+                                }
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+
+                    if (paymentIntent.status === 'succeeded') {
+                        // 3. Submit form to backend to create order
+                        // We can append the payment intent ID if needed
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.setAttribute('type', 'hidden');
+                        hiddenInput.setAttribute('name', 'payment_intent_id');
+                        hiddenInput.setAttribute('value', paymentIntent.id);
+                        form.appendChild(hiddenInput);
+                        
+                        form.submit();
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    const displayError = document.getElementById('card-errors');
+                    displayError.textContent = error.message;
+                    displayError.classList.remove('hidden');
+                    
+                    // Reset button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
             }
         });
     </script>
