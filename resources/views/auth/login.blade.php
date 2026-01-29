@@ -56,6 +56,19 @@ use Illuminate\Support\Facades\Route;
                 </div>
             </form>
 
+            <div class="mt-6 flex items-center justify-between">
+                <span class="border-b w-1/5 lg:w-1/4"></span>
+                <span class="text-xs text-center text-gray-500 uppercase">or</span>
+                <span class="border-b w-1/5 lg:w-1/4"></span>
+            </div>
+
+            <div class="mt-6">
+                <a href="{{ route('auth.google') }}" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition">
+                    <img class="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
+                    Continue with Google
+                </a>
+            </div>
+
             <p class="text-center text-sm text-gray-600 mt-6">
                 Don’t have an account? 
                 <a href="{{ route('register') }}" class="text-[[#49608a]] hover:underline">Register here</a>

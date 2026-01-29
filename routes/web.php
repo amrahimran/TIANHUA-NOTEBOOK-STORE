@@ -12,9 +12,14 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 
+use App\Http\Controllers\SocialiteController;
+
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('auth/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
 
 Route::middleware([
     'auth:sanctum',
